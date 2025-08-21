@@ -1,10 +1,10 @@
 name: build and releases
 on:
-    workflow_dispatch:
-    push:
-      # run only against tags
-      tags:
-        - '*'
+  push:
+    branches:
+      - "build"
+  workflow_dispatch:
+    
 
 jobs:
   go-build:
