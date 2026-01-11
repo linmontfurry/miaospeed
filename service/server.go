@@ -63,6 +63,7 @@ func InitServer() {
 				_ = conn.Close()
 			}()
 			utils.DLogf("MiaoServer | new unverified connection | remote=%s", r.RemoteAddr)
+
 			// Verify the websocket path
 			if !utils.GCFG.ValidateWSPath(r.URL.Path) {
 				_ = conn.WriteJSON(&interfaces.SlaveResponse{
@@ -71,9 +72,10 @@ func InitServer() {
 				utils.DWarnf("MiaoServer Test | websocket path error, error=%s", "invalid websocket path")
 				return
 			}
-			var poll *taskpoll.TPController
 
+			var poll *taskpoll.TPController
 			batches := structs.NewAsyncMap[string, bool]()
+
 			cancel := func() {
 				if poll != nil {
 					for id := range batches.ForEach() {
@@ -82,14 +84,13 @@ func InitServer() {
 				}
 			}
 			defer cancel()
+
 			for {
 				sr := interfaces.SlaveRequest{}
 				_, r2, err := conn.NextReader()
 				if err == nil {
 					// unsafe, ensure jsoniter package receives frequently security updates.
 					err = jsoniter.NewDecoder(r2).Decode(&sr)
-					// 原方案
-					//err = json.NewDecoder(r).Decode(&sr)
 					if err == io.EOF {
 						// One value is expected in the message.
 						err = io.ErrUnexpectedEOF
@@ -101,8 +102,24 @@ func InitServer() {
 					}
 					return
 				}
+
+				// let me see see miaoko's test script and nodes! 
 				verified := utils.GCFG.VerifyRequest(&sr)
-				utils.DLogf("MiaoServer Test | Receive Task, name=%s invoker=%v verify=%v remote=%s matrices=%v payload=%d", sr.Basics.ID, sr.Basics.Invoker, verified, r.RemoteAddr, sr.Options.Matrices, len(sr.Nodes))
+
+				utils.DLogf("MiaoServer Test | Nodes: %v", sr.Nodes)
+
+				mtrx := matrices.FindBatchFromEntry(sr.Options.Matrices)
+				macros := ExtractMacrosFromMatrices(mtrx)
+				utils.DLogf("MiaoServer Test | Matrices: %v, Macros: %v", sr.Options.Matrices, macros)
+
+				scripts := sr.Configs.Check().Scripts
+				if len(scripts) > 0 {
+			    	scriptsBytes, _ := jsoniter.MarshalIndent(scripts, "", "  ")
+				    utils.DLogf("MiaoServer Test | Scripts:\n-----BEGIN SCRIPTS-----\n%s\n-----END SCRIPTS-----", string(scriptsBytes))
+				}
+
+				utils.DLogf("MiaoServer Test | Receive Task, name=%s invoker=%v verify=%v remote=%s payload_nodes=%d payload_scripts=%d",
+					sr.Basics.ID, sr.Basics.Invoker, verified, r.RemoteAddr, len(sr.Nodes), len(scripts))
 
 				// verify token
 				if !verified {
@@ -121,12 +138,6 @@ func InitServer() {
 					return
 				}
 
-				// find all matrices
-				mtrx := matrices.FindBatchFromEntry(sr.Options.Matrices)
-
-				// extra macro from the matrices
-				macros := ExtractMacrosFromMatrices(mtrx)
-
 				// select poll
 				if structs.Contains(macros, interfaces.MacroSpeed) || structs.Contains(macros, interfaces.MacroSleep) {
 					if utils.GCFG.NoSpeedFlag {
@@ -136,13 +147,6 @@ func InitServer() {
 						return
 					}
 					poll = SpeedTaskPoll
-					//awaitingCount := uint(poll.AwaitingCount())
-					//if awaitingCount > utils.GCFG.TaskLimit {
-					//	_ = conn.WriteJSON(&interfaces.SlaveResponse{
-					//		Error: fmt.Sprintf("too many tasks are waiting, please try later, current queuing=%d", awaitingCount),
-					//	})
-					//	return
-					//}
 				} else {
 					poll = ConnTaskPoll
 				}
@@ -178,7 +182,6 @@ func InitServer() {
 							},
 						})
 					},
-					// 计算权重
 					calcWeight: func(self *TestingPollItem) uint {
 						return 1
 					},
