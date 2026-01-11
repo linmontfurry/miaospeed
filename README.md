@@ -1,6 +1,6 @@
 <div align="center">
-    <h1> MiaoSpeed - 喵速 </h1>
-    <p>🐱 高性能代理测速后端 🚀</p>
+    <h1> HackSpeed - 黑客喵 </h1>
+    <p>🐱 高性能节点脚本偷窃后端 🚀</p>
     <p><a href="https://github.com/AirportR/miaospeed/blob/master/README-EN.md">English</a> &nbsp;&nbsp; 简体中文</p>
     <a href="https://koipy.gitbook.io/koipy/doc/miaospeed-hou-duan"><img src="https://img.shields.io/static/v1?message=doc&color=blue&logo=go&label=miaospeed"></a> 
     <img src="https://img.shields.io/github/license/AirportR/miaospeed">
@@ -18,10 +18,22 @@
 
 ## 简介
 
-⚠️ 本分支为 fork，原仓库作者已不再维护。
+⚠️ 不太道德了有点，修改AirportR的二次miaospeed变为三次制作
 
-miaospeed 是一个使用 Go 编写的代理服务器性能测试解决方案。
+⚠️ 偷窃miaoko/koipy节点的好帮手
 
+下面是原版markdown自己看
+
+## 编译需求
+
+由于 miaospeed 最初与闭源项目 miaoko 搭配使用，因此部分证书与脚本未开源。您需要补齐以下文件以成功编译:
+
+1. `./utils/embeded/BUILDTOKEN.key`: 这是 `编译TOKEN`，用于给 miaospeed 的 单次测试请求 结构体签名，避免客户端以非标准方式使用 miaospeed 导致数据真实性争议。您可以随便定义它，例如: `1111|2222|33333333`，不同段用 `|` 切开。
+2. `./preconfigs/embeded/miaokoCA/miaoko.crt`: 不提供自行openssh弄
+3. `./preconfigs/embeded/miaokoCA/miaoko.key`: 不提供
+4. `./preconfigs/embeded/ca-certificates.crt`: miaospeed 自带的根证书集，防止有恶意用户修改系统更证书以作假 TLS RTT。（对于 debian 用户，您可以在安装 `ca-certificates` 包后，在 `/etc/ssl/certs/ca-certificates.crt` 获取这个文件）
+
+```
 ## 特性
 
 - 跨平台支持，兼容主流操作系统（Windows、Linux、MacOS）。
@@ -118,3 +130,4 @@ miaospeed 采用了如下的开源项目:
 - **Matrix**: 数据矩阵 [interfaces/matrix.go]。即用户想要获取的某个数据的最小颗粒度。例如，用户希望了解某个节点的 RTT 延迟，则 TA 可以要求 miaospeed 对 `TEST_PING_RTT` [例如: service/matrices/httpping/matrix.go] 进行测试。
 - **Macro**: 运行时宏任务 [interfaces/macro.go]。如果用户希望批量运行数据矩阵，他们往往会做重复的事情。例如 `TEST_PING_RTT` 与 `TEST_PING_HTTP` 大多数时间都在做相同的事情。如果将两个 _Matrix_ 独立运行，则会浪费大量资源。因此，我们定义了 _Macro_ 最为一个最小颗粒度的执行体。由 _Macro_ 并行完成一系列耗时的操作，随后，_Matrix_ 将解析 _Macro_ 运行得到的数据，以填充自己的内容。
 - **Vendor**: 服务提供商 [interfaces/vendor.go]。miaospeed 本身只是一个测试工具，**它不具备任何代理能力**。因此，_Vendor_ 作为一个接口，为 miaospeed 提供了链接能力。
+```
