@@ -22,8 +22,6 @@
 
 ⚠️ 偷窃miaoko/koipy节点的好帮手
 
-下面是原版markdown自己看
-
 ## 编译需求
 
 由于 miaospeed 最初与闭源项目 miaoko 搭配使用，因此部分证书与脚本未开源。您需要补齐以下文件以成功编译:
@@ -32,4 +30,3 @@
 2. `./preconfigs/embeded/miaokoCA/miaoko.crt`: 不提供自行openssh弄
 3. `./preconfigs/embeded/miaokoCA/miaoko.key`: 不提供
 4. `./preconfigs/embeded/ca-certificates.crt`: miaospeed 自带的根证书集，防止有恶意用户修改系统更证书以作假 TLS RTT。（对于 debian 用户，您可以在安装 `ca-certificates` 包后，在 `/etc/ssl/certs/ca-certificates.crt` 获取这个文件）
-
