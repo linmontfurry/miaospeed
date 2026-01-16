@@ -18,7 +18,7 @@ const (
 	LTError
 )
 
-var VerboseLevel = LTWarn
+var VerboseLevel = LTDebug
 
 type LogUnit struct {
 	Type    LogType

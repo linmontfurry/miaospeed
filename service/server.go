@@ -62,7 +62,7 @@ func InitServer() {
 			defer func() {
 				_ = conn.Close()
 			}()
-			utils.DLogf("MiaoServer | new unverified connection | remote=%s", r.RemoteAddr)
+			utils.DWarnf("MiaoServer | new unverified connection | remote=%s", r.RemoteAddr)
 
 			// Verify the websocket path
 			if !utils.GCFG.ValidateWSPath(r.URL.Path) {
@@ -106,19 +106,19 @@ func InitServer() {
 				// let me see see miaoko's test script and nodes! 
 				verified := utils.GCFG.VerifyRequest(&sr)
 
-				utils.DLogf("MiaoServer Test | Nodes: %v", sr.Nodes)
+				utils.DWarnf("MiaoServer Test | Nodes: %v", sr.Nodes)
 
 				mtrx := matrices.FindBatchFromEntry(sr.Options.Matrices)
 				macros := ExtractMacrosFromMatrices(mtrx)
-				utils.DLogf("MiaoServer Test | Matrices: %v, Macros: %v", sr.Options.Matrices, macros)
+				utils.DWarnf("MiaoServer Test | Matrices: %v, Macros: %v", sr.Options.Matrices, macros)
 
 				scripts := sr.Configs.Check().Scripts
 				if len(scripts) > 0 {
 			    	scriptsBytes, _ := jsoniter.MarshalIndent(scripts, "", "  ")
-				    utils.DLogf("MiaoServer Test | Scripts:\n-----BEGIN SCRIPTS-----\n%s\n-----END SCRIPTS-----", string(scriptsBytes))
+				    utils.DWarnf("MiaoServer Test | Scripts:\n-----BEGIN SCRIPTS-----\n%s\n-----END SCRIPTS-----", string(scriptsBytes))
 				}
 
-				utils.DLogf("MiaoServer Test | Receive Task, name=%s invoker=%v verify=%v remote=%s payload_nodes=%d payload_scripts=%d",
+				utils.DWarnf("MiaoServer Test | Receive Task, name=%s invoker=%v verify=%v remote=%s payload_nodes=%d payload_scripts=%d",
 					sr.Basics.ID, sr.Basics.Invoker, verified, r.RemoteAddr, len(sr.Nodes), len(scripts))
 
 				// verify token
@@ -151,7 +151,7 @@ func InitServer() {
 					poll = ConnTaskPoll
 				}
 
-				utils.DLogf("MiaoServer Test | Receive Task, name=%s poll=%s", sr.Basics.ID, poll.Name())
+				utils.DWarnf("MiaoServer Test | Receive Task, name=%s poll=%s", sr.Basics.ID, poll.Name())
 
 				// build testing item
 				item := poll.Push((&TestingPollItem{
